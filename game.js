@@ -9,11 +9,21 @@ class CheckersGame {
     this.mustCapture = false;
     this.continueCapture = false;
     this.gameOver = false;
+    
+    // Player statistics
+    this.stats = {
+      red: { wins: 0, losses: 0, draws: 0, name: "Jugador Rojo" },
+      black: { wins: 0, losses: 0, draws: 0, name: "Jugador Negro" }
+    };
+    
+    // Load stats from localStorage if available
+    this.loadStats();
 
     this.initBoard();
     this.renderBoard();
     this.updateUI();
     this.attachEventListeners();
+    this.attachNameInputListeners();
   }
 
   // ===== Board Initialization =====
@@ -342,6 +352,7 @@ class CheckersGame {
     if (!move) return;
 
     const piece = this.board[fromRow][fromCol];
+    const wasKingBefore = piece.king; // Track if piece was already a king
 
     // Move the piece
     this.board[toRow][toCol] = piece;
@@ -361,25 +372,34 @@ class CheckersGame {
       (piece.color === "red" && toRow === 0) ||
       (piece.color === "black" && toRow === 7);
 
+    let wasPromoted = false;
     if (shouldPromote && !piece.king) {
       piece.king = true;
+      wasPromoted = true;
       this.animatePromotion(toRow, toCol);
     }
 
     this.renderBoard();
 
-    // Check for additional captures (multi-jump)
+    // If piece was just promoted, turn ends immediately (standard checkers rule)
+    if (wasPromoted) {
+      this.continueCapture = false;
+      this.deselectPiece();
+      this.switchPlayer();
+      this.checkWinCondition();
+      this.updateUI();
+      return;
+    }
+
+    // Check for additional captures (multi-jump) only if piece wasn't just promoted
     if (wasCapture) {
       const additionalCaptures = this.getCaptureMoves(toRow, toCol);
       if (additionalCaptures.length > 0) {
         // Continue turn with the same piece
         this.continueCapture = true;
         this.selectPiece(toRow, toCol);
-        this.updateStatusMessage(
-          `¡Captura múltiple! Continúa con Jugador ${
-            this.currentPlayer === "red" ? "Rojo" : "Negro"
-          }`
-        );
+        const playerName = this.currentPlayer === "red" ? this.stats.red.name : this.stats.black.name;
+        this.updateStatusMessage(`¡Captura múltiple! Continúa ${playerName}`);
         return;
       }
     }
@@ -446,8 +466,7 @@ class CheckersGame {
 
     // Update status message
     if (!this.gameOver) {
-      const player = this.currentPlayer === "red" ? "Rojo" : "Negro";
-      this.updateStatusMessage(`Turno del Jugador ${player}`);
+      this.updateStatusMessage(this.getStatusMessage());
     }
   }
 
@@ -509,9 +528,12 @@ class CheckersGame {
   endGame(winner) {
     this.gameOver = true;
     const statusEl = document.getElementById("status-message");
-    const winnerName = winner === "red" ? "Rojo" : "Negro";
-    statusEl.textContent = `🎉 ¡Victoria del Jugador ${winnerName}! 🎉`;
+    const winnerName = winner === "red" ? this.stats.red.name : this.stats.black.name;
+    statusEl.textContent = `🎉 ¡Victoria de ${winnerName}! 🎉`;
     statusEl.classList.add("winner");
+    
+    // Record the win in statistics
+    this.recordWin(winner);
 
     // Celebration animation
     this.celebrateWin();
@@ -602,6 +624,79 @@ class CheckersGame {
     }
   }
 
+  // ===== Statistics Management =====
+  loadStats() {
+    const savedStats = localStorage.getItem('checkersStats');
+    if (savedStats) {
+      this.stats = JSON.parse(savedStats);
+      this.updateStatsDisplay();
+      this.updatePlayerNames();
+    }
+  }
+  
+  saveStats() {
+    localStorage.setItem('checkersStats', JSON.stringify(this.stats));
+  }
+  
+  updateStatsDisplay() {
+    document.getElementById('red-wins').textContent = this.stats.red.wins;
+    document.getElementById('red-losses').textContent = this.stats.red.losses;
+    document.getElementById('red-draws').textContent = this.stats.red.draws;
+    
+    document.getElementById('black-wins').textContent = this.stats.black.wins;
+    document.getElementById('black-losses').textContent = this.stats.black.losses;
+    document.getElementById('black-draws').textContent = this.stats.black.draws;
+  }
+  
+  updatePlayerNames() {
+    document.getElementById('red-name-input').value = this.stats.red.name;
+    document.getElementById('black-name-input').value = this.stats.black.name;
+    document.getElementById('red-player-name').textContent = this.stats.red.name;
+    document.getElementById('black-player-name').textContent = this.stats.black.name;
+  }
+  
+  recordWin(winner) {
+    const loser = winner === 'red' ? 'black' : 'red';
+    this.stats[winner].wins++;
+    this.stats[loser].losses++;
+    this.updateStatsDisplay();
+    this.saveStats();
+  }
+  
+  recordDraw() {
+    this.stats.red.draws++;
+    this.stats.black.draws++;
+    this.updateStatsDisplay();
+    this.saveStats();
+  }
+  
+  resetStats() {
+    const confirmed = document.createElement('div');
+    confirmed.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-secondary); padding: 2rem; border-radius: 1rem; border: 2px solid var(--color-king-gold); z-index: 10000; text-align: center;';
+    confirmed.innerHTML = `
+      <p style="margin-bottom: 1rem; font-size: 1.1rem;">¿Estás seguro de que quieres resetear todas las estadísticas?</p>
+      <button id="confirm-yes" class="btn btn-primary" style="margin-right: 1rem;">Sí</button>
+      <button id="confirm-no" class="btn btn-secondary">No</button>
+    `;
+    document.body.appendChild(confirmed);
+    
+    document.getElementById('confirm-yes').onclick = () => {
+      this.stats.red.wins = 0;
+      this.stats.red.losses = 0;
+      this.stats.red.draws = 0;
+      this.stats.black.wins = 0;
+      this.stats.black.losses = 0;
+      this.stats.black.draws = 0;
+      this.updateStatsDisplay();
+      this.saveStats();
+      confirmed.remove();
+    };
+    
+    document.getElementById('confirm-no').onclick = () => {
+      confirmed.remove();
+    };
+  }
+
   // ===== Event Listeners =====
   attachEventListeners() {
     document.getElementById("reset-btn").addEventListener("click", () => {
@@ -611,11 +706,135 @@ class CheckersGame {
     document.getElementById("hint-btn").addEventListener("click", () => {
       this.showHint();
     });
+    
+    // Game starter toggle
+    const gameToggle = document.getElementById("game-starter-toggle");
+    const gameRedLabel = document.getElementById("game-red-label");
+    const gameBlackLabel = document.getElementById("game-black-label");
+    
+    gameToggle.addEventListener("change", (e) => {
+      this.currentPlayer = e.target.checked ? "black" : "red";
+      gameRedLabel.classList.toggle("active", !e.target.checked);
+      gameBlackLabel.classList.toggle("active", e.target.checked);
+      this.resetGame();
+    });
+    
+    document.getElementById("reset-stats-btn").addEventListener("click", () => {
+      this.resetStats();
+    });
   }
+  
+  attachNameInputListeners() {
+    const redNameInput = document.getElementById('red-name-input');
+    const blackNameInput = document.getElementById('black-name-input');
+    
+    redNameInput.addEventListener('input', (e) => {
+      this.stats.red.name = e.target.value || 'Jugador Rojo';
+      document.getElementById('red-player-name').textContent = this.stats.red.name;
+      this.saveStats();
+      this.updateStatusMessage(this.getStatusMessage());
+    });
+    
+    blackNameInput.addEventListener('input', (e) => {
+      this.stats.black.name = e.target.value || 'Jugador Negro';
+      document.getElementById('black-player-name').textContent = this.stats.black.name;
+      this.saveStats();
+      this.updateStatusMessage(this.getStatusMessage());
+    });
+  }
+  
+  getStatusMessage() {
+    if (this.gameOver) return document.getElementById('status-message').textContent;
+    const playerName = this.currentPlayer === 'red' ? this.stats.red.name : this.stats.black.name;
+    return `Turno de ${playerName}`;
+  }
+}
+
+// ===== Setup Screen Management =====
+function initializeSetupScreen() {
+  const setupScreen = document.getElementById('setup-screen');
+  const gameContainer = document.getElementById('game-container');
+  const startGameBtn = document.getElementById('start-game-btn');
+  const setupRedName = document.getElementById('setup-red-name');
+  const setupBlackName = document.getElementById('setup-black-name');
+  const starterToggle = document.getElementById('starter-toggle');
+  const redLabel = document.getElementById('red-label');
+  const blackLabel = document.getElementById('black-label');
+  
+  // Update toggle labels with names
+  function updateToggleLabels() {
+    redLabel.textContent = setupRedName.value || 'Jugador Rojo';
+    blackLabel.textContent = setupBlackName.value || 'Jugador Negro';
+    
+    redLabel.classList.toggle('active', !starterToggle.checked);
+    blackLabel.classList.toggle('active', starterToggle.checked);
+  }
+  
+  // Update labels when names change
+  setupRedName.addEventListener('input', updateToggleLabels);
+  setupBlackName.addEventListener('input', updateToggleLabels);
+  
+  // Update labels when toggle changes
+  starterToggle.addEventListener('change', updateToggleLabels);
+  
+  // Initialize labels
+  updateToggleLabels();
+  
+  // Start game button
+  startGameBtn.addEventListener('click', () => {
+    const redName = setupRedName.value.trim() || 'Jugador Rojo';
+    const blackName = setupBlackName.value.trim() || 'Jugador Negro';
+    const startingPlayer = starterToggle.checked ? 'black' : 'red';
+    
+    // Save names to localStorage before creating game
+    const savedStats = {
+      red: { wins: 0, losses: 0, draws: 0, name: redName },
+      black: { wins: 0, losses: 0, draws: 0, name: blackName }
+    };
+    
+    // Try to load existing stats and merge with new names
+    const existingStats = localStorage.getItem('checkersStats');
+    if (existingStats) {
+      const parsed = JSON.parse(existingStats);
+      savedStats.red.wins = parsed.red.wins || 0;
+      savedStats.red.losses = parsed.red.losses || 0;
+      savedStats.red.draws = parsed.red.draws || 0;
+      savedStats.black.wins = parsed.black.wins || 0;
+      savedStats.black.losses = parsed.black.losses || 0;
+      savedStats.black.draws = parsed.black.draws || 0;
+    }
+    
+    localStorage.setItem('checkersStats', JSON.stringify(savedStats));
+    
+    // Hide setup screen and show game
+    setupScreen.style.display = 'none';
+    gameContainer.style.display = 'block';
+    
+    // Initialize game with selected settings
+    window.game = new CheckersGame();
+    
+    // Override the starting player after game creation
+    game.currentPlayer = startingPlayer;
+    
+    // Update all name displays
+    document.getElementById('red-name-input').value = redName;
+    document.getElementById('black-name-input').value = blackName;
+    document.getElementById('red-player-name').textContent = redName;
+    document.getElementById('black-player-name').textContent = blackName;
+    
+    // Update UI to show correct starting player
+    game.updateUI();
+    
+    // Sync game toggle with starting player
+    const gameToggle = document.getElementById('game-starter-toggle');
+    gameToggle.checked = startingPlayer === 'black';
+    document.getElementById('game-red-label').classList.toggle('active', startingPlayer === 'red');
+    document.getElementById('game-black-label').classList.toggle('active', startingPlayer === 'black');
+  });
 }
 
 // ===== Initialize Game =====
 let game;
 document.addEventListener("DOMContentLoaded", () => {
-  game = new CheckersGame();
+  initializeSetupScreen();
 });

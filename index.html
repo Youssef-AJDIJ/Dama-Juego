@@ -1,109 +1,170 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Juego de Damas interactivo con diseño moderno y animaciones fluidas. Juega gratis online."
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Juego de Damas interactivo con diseño moderno y animaciones fluidas. Juega gratis online.">
     <title>Juego de Damas - Checkers Game</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>🎯 Juego de Damas</h1>
-        <p class="subtitle">Checkers Premium Edition</p>
-      </header>
-
-      <main>
-        <div class="game-wrapper">
-          <!-- Player Info -->
-          <div class="player-info player-red">
-            <div class="player-avatar">
-              <div class="piece-preview red"></div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Setup Screen -->
+    <div id="setup-screen" class="setup-screen">
+        <div class="setup-container">
+            <h1>🎯 Configurar Jugadores</h1>
+            <div class="setup-form">
+                <div class="name-setup">
+                    <label for="setup-red-name">Nombre Jugador Rojo</label>
+                    <input type="text" id="setup-red-name" class="setup-input" maxlength="20" placeholder="Ingresa nombre" value="Jugador Rojo">
+                </div>
+                
+                <div class="name-setup">
+                    <label for="setup-black-name">Nombre Jugador Negro</label>
+                    <input type="text" id="setup-black-name" class="setup-input" maxlength="20" placeholder="Ingresa nombre" value="Jugador Negro">
+                </div>
+                
+                <div class="starter-selection">
+                    <label>¿Quién empieza?</label>
+                    <div class="toggle-container">
+                        <span class="toggle-label" id="red-label">Jugador Rojo</span>
+                        <label class="switch">
+                            <input type="checkbox" id="starter-toggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="toggle-label" id="black-label">Jugador Negro</span>
+                    </div>
+                </div>
+                
+                <button id="start-game-btn" class="btn btn-primary btn-large">
+                    <span>🎮</span> Comenzar Juego
+                </button>
             </div>
-            <div class="player-details">
-              <h2>Jugador Rojo</h2>
-              <p class="pieces-count" id="red-count">12 piezas</p>
-            </div>
-            <div class="turn-indicator" id="red-indicator"></div>
-          </div>
-
-          <!-- Game Board -->
-          <div class="board-container">
-            <div id="game-board" class="game-board"></div>
-            <div class="status-message" id="status-message">
-              Turno del Jugador Rojo
-            </div>
-          </div>
-
-          <!-- Player Info -->
-          <div class="player-info player-black">
-            <div class="player-avatar">
-              <div class="piece-preview black"></div>
-            </div>
-            <div class="player-details">
-              <h2>Jugador Negro</h2>
-              <p class="pieces-count" id="black-count">12 piezas</p>
-            </div>
-            <div class="turn-indicator" id="black-indicator"></div>
-          </div>
         </div>
+    </div>
 
-        <!-- Game Controls -->
-        <div class="controls">
-          <button id="reset-btn" class="btn btn-primary">
-            <span>🔄</span> Nuevo Juego
-          </button>
-          <button id="hint-btn" class="btn btn-secondary">
-            <span>💡</span> Mostrar Movimientos
-          </button>
-        </div>
+    <!-- Game Container (hidden initially) -->
+    <div class="container game-container" id="game-container" style="display: none;">
+        <header>
+            <h1>🎯 Juego de Damas</h1>
+            <p class="subtitle">Checkers Premium Edition</p>
+        </header>
 
-        <!-- Game Rules -->
-        <details class="rules-section">
-          <summary>📖 Reglas del Juego</summary>
-          <div class="rules-content">
-            <ul>
-              <li>
-                <strong>Movimiento:</strong> Las piezas se mueven en diagonal
-                hacia adelante a casillas vacías.
-              </li>
-              <li>
-                <strong>Captura:</strong> Salta sobre las piezas del oponente
-                para capturarlas. Las capturas son obligatorias.
-              </li>
-              <li>
-                <strong>Capturas Múltiples:</strong> Si puedes capturar más
-                piezas después de una captura, debes continuar.
-              </li>
-              <li>
-                <strong>Corona (Reina):</strong> Cuando una pieza llega al otro
-                extremo del tablero, se convierte en reina y puede moverse hacia
-                adelante y hacia atrás.
-              </li>
-              <li>
-                <strong>Victoria:</strong> Gana el jugador que capture todas las
-                piezas del oponente o deje al oponente sin movimientos válidos.
-              </li>
-            </ul>
-          </div>
-        </details>
-      </main>
+        <main>
+            <div class="game-wrapper">
+                <!-- Player Info Red -->
+                <div class="player-info player-red">
+                    <div class="player-name-section">
+                        <input type="text" id="red-name-input" class="name-input" maxlength="20" placeholder="Nombre Jugador Rojo" value="Jugador Rojo">
+                    </div>
+                    <div class="player-avatar">
+                        <div class="piece-preview red"></div>
+                    </div>
+                    <div class="player-details">
+                        <h2 id="red-player-name">Jugador Rojo</h2>
+                        <p class="pieces-count" id="red-count">12 piezas</p>
+                    </div>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <span class="stat-label">🏆</span>
+                            <span class="stat-value" id="red-wins">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">❌</span>
+                            <span class="stat-value" id="red-losses">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">🤝</span>
+                            <span class="stat-value" id="red-draws">0</span>
+                        </div>
+                    </div>
+                    <div class="turn-indicator" id="red-indicator"></div>
+                </div>
 
-      <footer>
-        <p>Creado por Youssef Ajdij &copy; 2025</p>
-      </footer>
+                <!-- Game Board -->
+                <div class="board-container">
+                    <div id="game-board" class="game-board"></div>
+                    <div class="status-message" id="status-message">Turno del Jugador Rojo</div>
+                </div>
+
+                <!-- Player Info Black -->
+                <div class="player-info player-black">
+                    <div class="player-name-section">
+                        <input type="text" id="black-name-input" class="name-input" maxlength="20" placeholder="Nombre Jugador Negro" value="Jugador Negro">
+                    </div>
+                    <div class="player-avatar">
+                        <div class="piece-preview black"></div>
+                    </div>
+                    <div class="player-details">
+                        <h2 id="black-player-name">Jugador Negro</h2>
+                        <p class="pieces-count" id="black-count">12 piezas</p>
+                    </div>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <span class="stat-label">🏆</span>
+                            <span class="stat-value" id="black-wins">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">❌</span>
+                            <span class="stat-value" id="black-losses">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">🤝</span>
+                            <span class="stat-value" id="black-draws">0</span>
+                        </div>
+                    </div>
+                    <div class="turn-indicator" id="black-indicator"></div>
+                </div>
+            </div>
+
+            <!-- Game Controls -->
+            <div class="controls">
+                <button id="reset-btn" class="btn btn-primary">
+                    <span>🔄</span> Nuevo Juego
+                </button>
+                
+                <div class="game-starter-toggle">
+                    <span class="starter-label">Cambiar Turno:</span>
+                    <div class="inline-toggle-container">
+                        <span class="inline-toggle-label" id="game-red-label">Rojo</span>
+                        <label class="switch-small">
+                            <input type="checkbox" id="game-starter-toggle">
+                            <span class="slider-small"></span>
+                        </label>
+                        <span class="inline-toggle-label" id="game-black-label">Negro</span>
+                    </div>
+                </div>
+                
+                <button id="hint-btn" class="btn btn-secondary">
+                    <span>💡</span> Mostrar Movimientos
+                </button>
+                <button id="reset-stats-btn" class="btn btn-danger">
+                    <span>📊</span> Resetear Estadísticas
+                </button>
+            </div>
+
+            <!-- Game Rules -->
+            <details class="rules-section">
+                <summary>📖 Reglas del Juego</summary>
+                <div class="rules-content">
+                    <ul>
+                        <li><strong>Movimiento:</strong> Las piezas se mueven en diagonal hacia adelante a casillas vacías.</li>
+                        <li><strong>Captura:</strong> Salta sobre las piezas del oponente para capturarlas. Las capturas son obligatorias.</li>
+                        <li><strong>Capturas Múltiples:</strong> Si puedes capturar más piezas después de una captura, debes continuar.</li>
+                        <li><strong>Corona (Reina):</strong> Cuando una pieza llega al otro extremo del tablero, se convierte en reina y puede moverse hacia adelante y hacia atrás.</li>
+                        <li><strong>Victoria:</strong> Gana el jugador que capture todas las piezas del oponente o deje al oponente sin movimientos válidos.</li>
+                    </ul>
+                </div>
+            </details>
+        </main>
+
+        <footer>
+            <p>Creado por Youssef Ajdij &copy; 2025</p>
+        </footer>
     </div>
 
     <script src="game.js"></script>
-  </body>
+</body>
 </html>
