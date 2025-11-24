@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Juego de Damas interactivo con diseño moderno y animaciones fluidas. Juega gratis online."
+    />
+    <title>Juego de Damas - Checkers Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎯 Juego de Damas</h1>
+        <p class="subtitle">Checkers Premium Edition</p>
+      </header>
+
+      <main>
+        <div class="game-wrapper">
+          <!-- Player Info -->
+          <div class="player-info player-red">
+            <div class="player-avatar">
+              <div class="piece-preview red"></div>
+            </div>
+            <div class="player-details">
+              <h2>Jugador Rojo</h2>
+              <p class="pieces-count" id="red-count">12 piezas</p>
+            </div>
+            <div class="turn-indicator" id="red-indicator"></div>
+          </div>
+
+          <!-- Game Board -->
+          <div class="board-container">
+            <div id="game-board" class="game-board"></div>
+            <div class="status-message" id="status-message">
+              Turno del Jugador Rojo
+            </div>
+          </div>
+
+          <!-- Player Info -->
+          <div class="player-info player-black">
+            <div class="player-avatar">
+              <div class="piece-preview black"></div>
+            </div>
+            <div class="player-details">
+              <h2>Jugador Negro</h2>
+              <p class="pieces-count" id="black-count">12 piezas</p>
+            </div>
+            <div class="turn-indicator" id="black-indicator"></div>
+          </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="controls">
+          <button id="reset-btn" class="btn btn-primary">
+            <span>🔄</span> Nuevo Juego
+          </button>
+          <button id="hint-btn" class="btn btn-secondary">
+            <span>💡</span> Mostrar Movimientos
+          </button>
+        </div>
+
+        <!-- Game Rules -->
+        <details class="rules-section">
+          <summary>📖 Reglas del Juego</summary>
+          <div class="rules-content">
+            <ul>
+              <li>
+                <strong>Movimiento:</strong> Las piezas se mueven en diagonal
+                hacia adelante a casillas vacías.
+              </li>
+              <li>
+                <strong>Captura:</strong> Salta sobre las piezas del oponente
+                para capturarlas. Las capturas son obligatorias.
+              </li>
+              <li>
+                <strong>Capturas Múltiples:</strong> Si puedes capturar más
+                piezas después de una captura, debes continuar.
+              </li>
+              <li>
+                <strong>Corona (Reina):</strong> Cuando una pieza llega al otro
+                extremo del tablero, se convierte en reina y puede moverse hacia
+                adelante y hacia atrás.
+              </li>
+              <li>
+                <strong>Victoria:</strong> Gana el jugador que capture todas las
+                piezas del oponente o deje al oponente sin movimientos válidos.
+              </li>
+            </ul>
+          </div>
+        </details>
+      </main>
+
+      <footer>
+        <p>Creado con ❤️ usando HTML, CSS y JavaScript puro</p>
+      </footer>
+    </div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
