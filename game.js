@@ -2,7 +2,7 @@
 class CheckersGame {
   constructor() {
     this.board = [];
-    this.currentPlayer = "red";
+    this.currentPlayer = null;
     this.selectedPiece = null;
     this.selectedSquare = null;
     this.validMoves = [];
@@ -580,7 +580,7 @@ class CheckersGame {
   // ===== Game Controls =====
   resetGame() {
     this.board = [];
-    this.currentPlayer = "red";
+    this.currentPlayer = null;
     this.selectedPiece = null;
     this.selectedSquare = null;
     this.validMoves = [];
@@ -627,6 +627,7 @@ class CheckersGame {
   // ===== Statistics Management =====
   loadStats() {
     const savedStats = localStorage.getItem('checkersStats');
+    console.log(savedStats);
     if (savedStats) {
       this.stats = JSON.parse(savedStats);
       this.updateStatsDisplay();
@@ -713,10 +714,12 @@ class CheckersGame {
     const gameBlackLabel = document.getElementById("game-black-label");
     
     gameToggle.addEventListener("change", (e) => {
+      console.log(e.target.checked);
       this.currentPlayer = e.target.checked ? "black" : "red";
       gameRedLabel.classList.toggle("active", !e.target.checked);
       gameBlackLabel.classList.toggle("active", e.target.checked);
-      this.resetGame();
+      this.updateUI();
+      // this.resetGame();
     });
     
     document.getElementById("reset-stats-btn").addEventListener("click", () => {
@@ -761,6 +764,9 @@ function initializeSetupScreen() {
   const redLabel = document.getElementById('red-label');
   const blackLabel = document.getElementById('black-label');
   
+  
+
+  //////////////////////////////////////////////////
   // Update toggle labels with names
   function updateToggleLabels() {
     redLabel.textContent = setupRedName.value || 'Jugador Rojo';
@@ -785,6 +791,7 @@ function initializeSetupScreen() {
     const redName = setupRedName.value.trim() || 'Jugador Rojo';
     const blackName = setupBlackName.value.trim() || 'Jugador Negro';
     const startingPlayer = starterToggle.checked ? 'black' : 'red';
+    
     
     // Save names to localStorage before creating game
     const savedStats = {
@@ -821,6 +828,9 @@ function initializeSetupScreen() {
     document.getElementById('black-name-input').value = blackName;
     document.getElementById('red-player-name').textContent = redName;
     document.getElementById('black-player-name').textContent = blackName;
+
+    game.redName = redName;
+    game.blackName = blackName;
     
     // Update UI to show correct starting player
     game.updateUI();
